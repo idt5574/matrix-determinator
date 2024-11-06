@@ -11,6 +11,32 @@ int find_coll(double**, int, int, double, double, double);
 int find_line(double**, int, int, double, double, double);
 double** sort_matrix(double**, int, int); 
 
+int zero_str_stlb(double**, int, int);
+int zero_str_stlb(double**ar, int n, int k)
+{
+
+    int z[3] = {0, 0, 0};
+
+    for(int i = 0; i < n; i++) //str
+        for(int j = 0; j < k; j++)
+            if(ar[i][j]==0)
+                z[0]+=1;
+    
+    for(int i = 0; i < k; i++) //stlb
+        for(int j = 0; j < n; j++)
+            if(ar[i][j]==0)
+                z[1]+=1;
+    
+    if(z[0]==k)
+        z[2] = -1;
+
+    if(z[1]==n)
+        z[2] = -1;
+
+    return z[2];
+}
+
+
 int main(void)
 {
     srand(time(NULL)); // Инициализируем seed рандома
