@@ -2,18 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdarg.h>
 
 double count_determinant(double**, int, int);
 double** to_uptriang_matrix(double**, int, int);
 double** copy_to_temp(double**, int, int);
-double** switch_strings(double**, int, int, int, int);
-int find_coll(double**, int, int, double, double, double);
-int find_line(double**, int, int, double, double, double);
-double** sort_matrix(double**, int, int); 
+//double** switch_strings(double**, int, int, int, int);
+int find_coll(double**, int, int, double*);
+int find_line(double**, int, int, double*);
+double** remove_zeros(double** , int, int);
+//double** sort_matrix(double**, int, int);
+double* create_ar(int, ...);
+
 
 int main(void)
 {
-    srand(time(NULL)); // Инициализируем seed рандома
     int n, k; // Размерность массива
     scanf("%d %d", &n, &k); // Ввод n и k
  
@@ -21,41 +24,25 @@ int main(void)
     for(int i = 0; i < n; i++)
         ar[i] = malloc(sizeof(double) * k); 
 
-    for(int i = 0; i < n; i++) // Задаём рандомные значения каждой ячейке массива
-    {
+    for(int i = 0; i < n; i++)
         for(int j = 0; j < k; j++)
-        {
             scanf("%lf", &ar[i][j]);
-            //ar[i][j] = rand() % 10;
-        }
-    }
-    
-    for(int i = 0; i < n; i++) // Вывод изначального массива
+
+    for(int i = 0; i < n; i++)
     {
         for(int j = 0; j < k; j++)
             printf("%.1f ", ar[i][j]);
         printf("\n");
     }
-
-    int x = find_coll(ar, n, k, 0, 0, 0);
-    int y = find_line(ar, n, k, 0, 0, 0);
-
-    printf("%d %d", x, y);
-
-    printf("\n");
-
-    // ar = sort_matrix(ar, n, k);
-    
-    // for(int i = 0; i < n; i++) // Вывод полученного массива
-    // {
-    //     for(int j = 0; j < k; j++)
-    //         printf("%.1f ", ar[i][j]);
-    //     printf("\n");
-    // }
-
-    //double determinant = count_determinant(ar, n, k);
-    //printf("%.1f", determinant);
-
+    ar = remove_zeros(ar, n, k);
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < k; j++)
+            printf("%.1f ", ar[i][j]);
+        printf("\n");
+    }
+    // int x = count_determinant(ar, n, k);
+    // printf("%d", x);
     return 0;
 }
 
@@ -112,9 +99,10 @@ double** to_uptriang_matrix(double** ar, int h, int w)
 
 double count_determinant(double** ar, int h, int w)
 {
+    if(h != w || find_line(ar, h, w, create_ar(3, 0.0, 0.0, 0.0)) != -1 || find_coll(ar, h, w, create_ar(3, 0.0, 0.0, 0.0)) != -1) return 0;
+    
     double** temp = to_uptriang_matrix(ar, h, w);
     double res = 1;
-
 
     printf("\n");
 
@@ -130,57 +118,17 @@ double count_determinant(double** ar, int h, int w)
     return res;
 }
 
-double** switch_strings(double** ar, int h, int w, int a, int b) // Меняет местами строки с номерами a и b
-{
-    double** temp = copy_to_temp(ar, h, w);
-    
-    for(int i = 0; i < w; i++)
-    {
-        double temp_num = temp[a][i];
-        temp[a][i] = temp[b][i];
-        temp[b][i] = temp_num;
-    }
-
-    return temp;
-}
-
-double** sort_matrix(double** ar, int h, int w)
-{
-    double** temp = copy_to_temp(ar, h, w);
-
-    for(int i = 0; i < h; i++)
-    {
-        for(int j = 0; j < w; j++)
-            printf("%.1f ", temp[i][j]);
-        printf("\n");
-    }
-    
-    for(int i = 0; i < h - 1; i++)
-    {
-        printf("DEEP IN 1\n");
-        for(int j = 0; j < w - 1; j++)
-        {
-            printf("DEEP IN 2\n");
-            if(temp[i][j] == 0.0)
-            {
-                for(int k = i + 1; k < h - 1; k++)
-                {
-                    printf("DEEP IN 3\n");
-                    if(temp[k][j] != 0.0)
-                    {
-                        temp = switch_strings(temp, h, w, i, k);
-                        k = i + 1;
-                        printf("DEEP BREAKOUT 3\n");
-                        break;
-                    }
-                    printf("DEEP OUT 3\n");
-                }
-            }
-            printf("DEEP OUT 2\n");
-        }
-        printf("DEEP OUT 1\n");
-    }
-}
+// double** switch_strings(double** ar, int h, int w, int a, int b) // Меняет местами строки с номерами a и b
+// {
+//     double** temp = copy_to_temp(ar, h, w);   
+//     for(int i = 0; i < w; i++)
+//     {
+//         double temp_num = temp[a][i];
+//         temp[a][i] = temp[b][i];
+//         temp[b][i] = temp_num;
+//     }
+//     return temp;
+// }
 
 double** copy_to_temp(double** ar, int h, int w)
 {
@@ -191,33 +139,89 @@ double** copy_to_temp(double** ar, int h, int w)
     for(int i = 0; i < h; i++) // Копируем во временный массив значения из изначального
         for(int j = 0; j < w; j++)
             temp[i][j] = ar[i][j];
+
     return temp;
 }
 
-int find_line(double** ar, int h, int w, double a, double b, double c) // Поиск идентичной строки. Если существует, то возвращает номер строки, иначе -1
+int find_line(double** matrix, int h, int w, double* ar) // Поиск идентичной строки. Если существует, то возвращает номер строки, иначе -1
 {
     for(int i = 0; i < h; i++)
     {
-        if(ar[i][0] == a && ar[i][1] == b && ar[i][2] == c)
+        int flag = 1;
+        for(int j = 0; j < w; j++)
         {
-            return i;
+            if(matrix[i][j] != ar[j])
+            {
+                flag = 0;
+                break;
+            }
         }
+        if(flag) return i;
     }
 
+    free(ar);
     return -1;
 }
 
-int find_coll(double** ar, int h, int w, double a, double b, double c) // Поиск идентичного столбца. Если существует, то возввращает номер столбца, иначе -1
+int find_coll(double** matrix, int h, int w, double* ar) // Поиск идентичного столбца. Если существует, то возввращает номер столбца, иначе -1
 {
-    for(int i = 0; i < h; i++)
+    for(int i = 0; i < w; i++)
     {
-        if(ar[0][i] == a && ar[1][i] == b && ar[2][i] == c)
+        int flag = 1;
+        for(int j = 0; j < h; j++)
         {
-            return i;
+            if(matrix[j][i] != ar[j])
+            {
+                flag = 0;
+                break;
+            }
         }
+        if(flag) return i;
     }
 
+    free(ar);
     return -1;
 }
 
+double* create_ar(int n, ...)
+{
+    va_list arg;
+    va_start(arg, n);
 
+    double* ar = malloc(sizeof(double) * n);
+
+    for(int i = 0; i < n; i++)
+    {
+        ar[i] = va_arg(arg, double);
+    }
+
+    return ar;
+}
+
+double** remove_zeros(double** ar, int w, int h)
+{
+    double** temp = copy_to_temp(ar, w, h);
+
+    for(int i = 0; i < h; i++)
+        for(int j = 0; j < w; j++)
+        {
+            if(temp[i][j] == 0.0)
+            {
+                printf("\neshkere\n");
+                for(int k = 0; k < h; k++)
+                {
+                    if(temp[k][j] != 0.0)
+                    {
+                        printf("\nshkere2\n");
+                        for(int p = 0; p < w; p++)
+                        {
+                            temp[i][p] += temp[k][p];
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+    return temp;
+}
