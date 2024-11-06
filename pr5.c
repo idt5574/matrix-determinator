@@ -9,7 +9,7 @@ double** copy_to_temp(double**, int, int);
 double** switch_strings(double**, int, int, int, int);
 int find_coll(double**, int, int, double, double, double);
 int find_line(double**, int, int, double, double, double);
-double** sort_matrix(double**, int, int);
+double** sort_matrix(double**, int, int); //глебка хуесос
 
 int main(void)
 {
