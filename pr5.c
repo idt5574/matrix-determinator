@@ -12,7 +12,7 @@ int find_coll(double**, int, int, double*);
 int find_line(double**, int, int, double*);
 double** remove_zeros(double** , int, int);
 //double** sort_matrix(double**, int, int);
-double* create_ar(int, ...);
+double* create_iden_ar(int, double);
 
 
 int main(void)
@@ -34,13 +34,8 @@ int main(void)
             printf("%.1f ", ar[i][j]);
         printf("\n");
     }
-    ar = remove_zeros(ar, n, k);
-    for(int i = 0; i < n; i++)
-    {
-        for(int j = 0; j < k; j++)
-            printf("%.1f ", ar[i][j]);
-        printf("\n");
-    }
+    
+    double* ar = create_iden_ar(3, 0.0);
     // int x = count_determinant(ar, n, k);
     // printf("%d", x);
     return 0;
@@ -99,7 +94,7 @@ double** to_uptriang_matrix(double** ar, int h, int w)
 
 double count_determinant(double** ar, int h, int w)
 {
-    if(h != w || find_line(ar, h, w, create_ar(3, 0.0, 0.0, 0.0)) != -1 || find_coll(ar, h, w, create_ar(3, 0.0, 0.0, 0.0)) != -1) return 0;
+    if(h != w || find_line(ar, h, w, create_ar(3, 0.0)) != -1 || find_coll(ar, h, w, create_ar(3, 0.0, 0.0, 0.0)) != -1) return 0;
     
     double** temp = to_uptriang_matrix(ar, h, w);
     double res = 1;
@@ -183,16 +178,14 @@ int find_coll(double** matrix, int h, int w, double* ar) // Поиск иден�
     return -1;
 }
 
-double* create_ar(int n, ...)
+double* create_iden_ar(int n, double a)
 {
-    va_list arg;
-    va_start(arg, n);
 
     double* ar = malloc(sizeof(double) * n);
 
     for(int i = 0; i < n; i++)
     {
-        ar[i] = va_arg(arg, double);
+        ar[i] = a;
     }
 
     return ar;
