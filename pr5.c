@@ -10,31 +10,8 @@ double** switch_strings(double**, int, int, int, int);
 int find_coll(double**, int, int, double, double, double);
 int find_line(double**, int, int, double, double, double);
 double** sort_matrix(double**, int, int); 
-
 int zero_str_stlb(double**, int, int);
-int zero_str_stlb(double**ar, int n, int k)
-{
 
-    int z[3] = {0, 0, 0};
-
-    for(int i = 0; i < n; i++) //str
-        for(int j = 0; j < k; j++)
-            if(ar[i][j]==0)
-                z[0]+=1;
-    
-    for(int i = 0; i < k; i++) //stlb
-        for(int j = 0; j < n; j++)
-            if(ar[i][j]==0)
-                z[1]+=1;
-    
-    if(z[0]==k)
-        z[2] = -1;
-
-    if(z[1]==n)
-        z[2] = -1;
-
-    return z[2];
-}
 
 
 int main(void)
@@ -63,61 +40,36 @@ int main(void)
         printf("\n");
     }
 
-    int x = find_coll(ar, n, k, 0, 0, 0);
-    int y = find_line(ar, n, k, 0, 0, 0);
-
-    printf("%d %d", x, y);
-
-    printf("\n");
-
-    // ar = sort_matrix(ar, n, k);
-    
-    // for(int i = 0; i < n; i++) // Вывод полученного массива
-    // {
-    //     for(int j = 0; j < k; j++)
-    //         printf("%.1f ", ar[i][j]);
-    //     printf("\n");
-    // }
-
-    //double determinant = count_determinant(ar, n, k);
-    //printf("%.1f", determinant);
+    int x = count_determinant(ar, n, k);
+    printf("%d", x);
 
     return 0;
 }
 
 double** to_uptriang_matrix(double** ar, int h, int w)
 {
-    printf("D: func started\n");
     if(h != w) return 0; // Определяем, возможно ли посчитать определитель
     double** temp = copy_to_temp(ar, h, w);
     
     for(int i = 0; i < w; i++) // Первый цикл для перебора столбцов
     {
-        printf("DEEP 1: IN\n");
         for(int j = i; j < h - 1; j++) // Второй цикл для перебора строк
         {
-            printf("DEEP 2: (%d)IN\n", j);
             double r; // Коэффицент, на который мы будем домножать вычитаемое значение
             double x; // Вычитаемое значение (верхняя строчка типа)
             double y; // Ззначение которое нужно обнулить
-            printf("inic 2\n");
 
             if(temp[j + 1][i] != 0.0) // Если ззначение которое нужно обнулить уже обнулено то мы НИчегго не делаем  азу перехмдио к след шагу!
             { 
-                printf("DEEP 2 IF\n");
                 x = temp[i][i];  
                 y = temp[j + 1][i];
                 r = y / x;
             }
             else 
-            {
-                printf("DEEP 2 BREAKOUT\n");
                 break;
-            }
 
             for(int k = 0; k < w; k++) // Вычитаем из каждого элемента строки верхнее значение домноженное на r
             {
-                printf("DEEP 3: IN\n");
                 temp[j + 1][k] = temp[j + 1][k] - (temp[i][k] * r);
                 printf("\n");
                 for(int i = 0; i < h; i++) // Выводим каждое изменение массива
@@ -126,21 +78,21 @@ double** to_uptriang_matrix(double** ar, int h, int w)
                         printf("%.1f ", temp[i][j]);
                     printf("\n");
                 }
-                printf("\n");
-                printf("DEEP 3: OUT\n");
             }
-            printf("DEEP 2: OUT\n");
         }
-        printf("DEEP 1: OUT\n");
     }
     return temp;
 }
 
 double count_determinant(double** ar, int h, int w)
 {
-    double** temp = to_uptriang_matrix(ar, h, w);
-    double res = 1;
-
+    if(h != w || zero_str_stlb(ar, h, w) == -1) 
+    {
+        printf("NO!\n");
+        return 0;
+    }
+        double** temp = to_uptriang_matrix(ar, h, w);
+        double res = 1;
 
     printf("\n");
 
@@ -246,4 +198,25 @@ int find_coll(double** ar, int h, int w, double a, double b, double c) // Пои
     return -1;
 }
 
+int zero_str_stlb(double**ar, int n, int k)
+{
 
+    int z[3] = {0, 0, 0};
+
+    for(int i = 0; i < n; i++) //str
+        for(int j = 0; j < k; j++)
+            if(ar[i][j]==0.0)
+                z[0]+=1;
+    
+    for(int i = 0; i < k; i++) //stlb
+        for(int j = 0; j < n; j++)
+            if(ar[i][j]==0.0)
+                z[1]+=1;
+    
+    if(z[0]==k || z[1]==n || (z[0]==k && z[1]==n))
+        z[2] = -1;
+
+    
+
+    return z[2];
+}
